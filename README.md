@@ -59,7 +59,7 @@ Sends a message to the queue for processing in the opposite state.
 You can adjust the message polling frequency:
 
 ```lua
-EMQ.config.frequency = 2000  -- Poll every 2 seconds
+EMQ.config.frequency = 1000  -- Poll every 1 seconds
 ```
 
 ---
