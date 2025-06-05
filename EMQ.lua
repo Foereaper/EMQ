@@ -67,19 +67,17 @@ function Player:SendEMQMessage(queue, data)
     self:Data():Set("EMQ_Messages", allMessages)
 end
 
-if(GetStateMapId() > -1) then
-    for _, player in pairs(GetPlayersOnMap()) do
-        EMQ.RegisterMessageProcessor(_, player)
-    end
-else
-    for _, player in pairs(GetPlayersInWorld()) do
+local function OnLoad()
+    local mapId = GetStateMapId()
+    local eventId = (mapId == -1) and 3 or 28
+    RegisterPlayerEvent(eventId, EMQ.RegisterMessageProcessor)
+    
+    local players = (mapId == -1) and GetPlayersInWorld() or GetPlayersOnMap()
+    for _, player in pairs(players) do
         EMQ.RegisterMessageProcessor(_, player)
     end
 end
 
-RegisterPlayerEvent(3, EMQ.RegisterMessageProcessor)
-if not IsCompatibilityMode() then
-    RegisterPlayerEvent(28, EMQ.RegisterMessageProcessor)
-end
+RegisterServerEvent(33, OnLoad)
 
 return EMQ
