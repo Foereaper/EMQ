@@ -28,16 +28,18 @@ function EMQ.ProcessMessages(_, _, _, player)
     local dataCache = player:Data():AsTable()
     local allMessages = dataCache["EMQ_Messages"] or { world = {}, map = {} }
     local messagesToProcess = allMessages[oppositeContext] or {}
+    
+    if(#messagesToProcess > 0) then
+        allMessages[oppositeContext] = {}
+        player:Data():Set("EMQ_Messages", allMessages)
 
-    allMessages[oppositeContext] = {}
-    player:Data():Set("EMQ_Messages", allMessages)
-
-    for _, msg in pairs(messagesToProcess) do
-        local handler = EMQ.queues[msg.queue]
-        if handler then
-            handler(player, msg.data)
-        else
-            print("No registered handler for queue '" .. msg.queue .. "'. Discarding message.")
+        for _, msg in pairs(messagesToProcess) do
+            local handler = EMQ.queues[msg.queue]
+            if handler then
+                handler(player, msg.data)
+            else
+                print("No registered handler for queue '" .. msg.queue .. "'. Discarding message.")
+            end
         end
     end
 end
