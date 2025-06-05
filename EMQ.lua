@@ -36,6 +36,8 @@ function EMQ.ProcessMessages(_, _, _, player)
         local handler = EMQ.queues[msg.queue]
         if handler then
             handler(player, msg.data)
+        else
+            print("No registered handler for queue '" .. msg.queue .. "'. Discarding message.")
         end
     end
 end
@@ -53,10 +55,6 @@ function EMQ.RegisterQueue(queue, handlerFunction)
 end
 
 function Player:SendEMQMessage(queue, data)
-    if not EMQ.queues[queue] then
-        error("Queue '" .. queue .. "' is not registered.")
-    end
-    
     local originContext = getContext()
     local dataCache = self:Data():AsTable()
     local allMessages = dataCache["EMQ_Messages"] or { world = {}, map = {} }
