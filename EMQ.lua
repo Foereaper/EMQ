@@ -19,8 +19,9 @@ function EMQ.RegisterMessageProcessor(event, player)
 end
 
 function EMQ.ProcessMessages(_, _, _, player)
-    local oppositeContext = (getContext() == "world") and "map" or "world"
-    
+    local currentContext = getContext()
+    local oppositeContext = (currentContext == "world") and "map" or "world"
+
     if(IsCompatibilityMode()) then
         oppositeContext = "world"
     end
@@ -56,13 +57,22 @@ function EMQ.RegisterQueue(queue, handlerFunction)
     EMQ.queues[queue] = handlerFunction
 end
 
-function Player:SendEMQMessage(queue, data)
+function Player:SendEMQMessage(queue, data, sendToCurrentContextAsWell)
     local originContext = getContext()
+    local oppositeContext = (originContext == "world") and "map" or "world"
+    
     local dataCache = self:Data():AsTable()
     local allMessages = dataCache["EMQ_Messages"] or { world = {}, map = {} }
 
+    local message = { queue = queue, data = data }
+
     allMessages[originContext] = allMessages[originContext] or {}
-    table.insert(allMessages[originContext], { queue = queue, data = data })
+    table.insert(allMessages[originContext], message)
+
+    if sendToCurrentContextAsWell then
+        allMessages[oppositeContext] = allMessages[oppositeContext] or {}
+        table.insert(allMessages[oppositeContext], message)
+    end
 
     self:Data():Set("EMQ_Messages", allMessages)
 end
